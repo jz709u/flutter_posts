@@ -1,0 +1,35 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Flutter (iOS Simulator)",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": ["run", "-d", "iphone"],
+      "port": null
+    },
+    {
+      "name": "Flutter (macOS)",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": ["run", "-d", "macos"],
+      "port": null
+    },
+    {
+      "name": "Flutter (Chrome / Web)",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": ["run", "-d", "chrome", "--web-port", "8080"],
+      "port": 8080
+    },
+    {
+      "name": "Flutter Test",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": ["test"],
+      "port": null
+    },
+    {
+      "name": "Flutter Test (watch)",
+      "runtimeExecutable": "flutter",
+      "runtimeArgs": ["test", "--watch"],
+      "port": null
+    }
+  ]
+}

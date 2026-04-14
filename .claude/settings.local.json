@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(unzip -l /Users/hyro010/Code/FlutterProjects/flutter_proj_test/files.zip)",
+      "Bash(flutter --version)",
+      "Bash(flutter create:*)",
+      "Bash(flutter pub:*)",
+      "Bash(flutter test:*)",
+      "Bash(flutter analyze:*)",
+      "Bash(code /Users/hyro010/Code/FlutterProjects/flutter_proj_test)",
+      "Bash(flutter devices:*)",
+      "Bash(flutter doctor:*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(git init:*)",
+      "Bash(git add:*)"
+    ]
+  }
+}
