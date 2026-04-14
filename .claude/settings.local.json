@@ -21,7 +21,8 @@
       "Bash(npm install:*)",
       "Bash(node storyboard.js)",
       "Bash(npm root:*)",
-      "Bash(NODE_PATH=$\\(npm root -g\\) node storyboard.js)"
+      "Bash(NODE_PATH=$\\(npm root -g\\) node storyboard.js)",
+      "Bash(git mv:*)"
     ]
   }
 }
