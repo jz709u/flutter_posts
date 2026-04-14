@@ -12,7 +12,16 @@
       "Bash(flutter doctor:*)",
       "mcp__Claude_Preview__preview_start",
       "Bash(git init:*)",
-      "Bash(git add:*)"
+      "Bash(git add:*)",
+      "Bash(git commit -m ':*)",
+      "Bash(git remote:*)",
+      "Bash(git push:*)",
+      "Bash(npm list:*)",
+      "Bash(node -e \"require\\('pptxgenjs'\\)\")",
+      "Bash(npm install:*)",
+      "Bash(node storyboard.js)",
+      "Bash(npm root:*)",
+      "Bash(NODE_PATH=$\\(npm root -g\\) node storyboard.js)"
     ]
   }
 }
