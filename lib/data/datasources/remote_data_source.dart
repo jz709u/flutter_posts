@@ -13,60 +13,49 @@ class RemoteDataSource {
 
   final Dio dio;
 
-  Future<List<PostDto>> fetchPosts() async {
+  // Centralised error-mapping so every method stays free of try-catch boiler-plate.
+  Future<T> _request<T>(Future<T> Function() fn) async {
     try {
-      final response = await dio.get<List<dynamic>>('/posts');
-      return response.data!
-          .map((e) => PostDto.fromJson(e as Map<String, dynamic>))
-          .toList();
+      return await fn();
     } on DioException catch (e) {
       throw mapDioError(e);
     }
   }
 
-  Future<PostDto> fetchPost(int id) async {
-    try {
-      final response = await dio.get<Map<String, dynamic>>('/posts/$id');
-      return PostDto.fromJson(response.data!);
-    } on DioException catch (e) {
-      throw mapDioError(e);
-    }
-  }
+  Future<List<PostDto>> fetchPosts() => _request(() async {
+        final response = await dio.get<List<dynamic>>('/posts');
+        return response.data!
+            .map((e) => PostDto.fromJson(e as Map<String, dynamic>))
+            .toList();
+      });
 
-  Future<List<PostDto>> fetchPostsByUser(int userId) async {
-    try {
-      final response = await dio.get<List<dynamic>>(
-        '/posts',
-        queryParameters: {'userId': userId},
-      );
-      return response.data!
-          .map((e) => PostDto.fromJson(e as Map<String, dynamic>))
-          .toList();
-    } on DioException catch (e) {
-      throw mapDioError(e);
-    }
-  }
+  Future<PostDto> fetchPost(int id) => _request(() async {
+        final response = await dio.get<Map<String, dynamic>>('/posts/$id');
+        return PostDto.fromJson(response.data!);
+      });
 
-  Future<List<CommentDto>> fetchComments(int postId) async {
-    try {
-      final response = await dio.get<List<dynamic>>(
-        '/comments',
-        queryParameters: {'postId': postId},
-      );
-      return response.data!
-          .map((e) => CommentDto.fromJson(e as Map<String, dynamic>))
-          .toList();
-    } on DioException catch (e) {
-      throw mapDioError(e);
-    }
-  }
+  Future<List<PostDto>> fetchPostsByUser(int userId) => _request(() async {
+        final response = await dio.get<List<dynamic>>(
+          '/posts',
+          queryParameters: {'userId': userId},
+        );
+        return response.data!
+            .map((e) => PostDto.fromJson(e as Map<String, dynamic>))
+            .toList();
+      });
 
-  Future<UserDto> fetchUser(int id) async {
-    try {
-      final response = await dio.get<Map<String, dynamic>>('/users/$id');
-      return UserDto.fromJson(response.data!);
-    } on DioException catch (e) {
-      throw mapDioError(e);
-    }
-  }
+  Future<List<CommentDto>> fetchComments(int postId) => _request(() async {
+        final response = await dio.get<List<dynamic>>(
+          '/comments',
+          queryParameters: {'postId': postId},
+        );
+        return response.data!
+            .map((e) => CommentDto.fromJson(e as Map<String, dynamic>))
+            .toList();
+      });
+
+  Future<UserDto> fetchUser(int id) => _request(() async {
+        final response = await dio.get<Map<String, dynamic>>('/users/$id');
+        return UserDto.fromJson(response.data!);
+      });
 }

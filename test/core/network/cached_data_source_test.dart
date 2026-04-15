@@ -71,8 +71,9 @@ class _FakeRemote extends RemoteDataSource {
 
 CachedDataSource _build(_FakeRemote remote) => CachedDataSource(
       remote: remote,
-      postCache: InMemoryCache<String, dynamic>(),
-      userCache: InMemoryCache<int, dynamic>(),
+      postListCache: InMemoryCache<String, List<PostDto>>(),
+      postCache: InMemoryCache<String, PostDto>(),
+      userCache: InMemoryCache<int, UserDto>(),
     );
 
 // ---------------------------------------------------------------------------
@@ -103,15 +104,16 @@ void main() {
 
     test('after TTL expires, remote is called again', () async {
       final remote = _FakeRemote();
-      final postCache = InMemoryCache<String, dynamic>();
+      final postListCache = InMemoryCache<String, List<PostDto>>();
       final ds = CachedDataSource(
         remote: remote,
-        postCache: postCache,
-        userCache: InMemoryCache<int, dynamic>(),
+        postListCache: postListCache,
+        postCache: InMemoryCache<String, PostDto>(),
+        userCache: InMemoryCache<int, UserDto>(),
       );
 
       await ds.fetchPosts();
-      postCache.invalidate('all_posts'); // simulate expiry
+      postListCache.invalidate(CacheKeys.allPosts); // simulate expiry
       await ds.fetchPosts();
 
       expect(remote.fetchPostsCount, 2);

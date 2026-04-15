@@ -14,7 +14,7 @@ final postsProvider = AsyncNotifierProvider<PostsNotifier, List<Post>>(
 class PostsNotifier extends AsyncNotifier<List<Post>> {
   @override
   Future<List<Post>> build() async {
-    final result = await ref.read(postRepositoryProvider).getPosts();
+    final result = await ref.watch(postRepositoryProvider).getPosts();
     return result.when(
       success: (posts) => posts,
       failure: (e) => throw e,
@@ -32,7 +32,7 @@ final postProvider =
 class PostNotifier extends FamilyAsyncNotifier<Post, int> {
   @override
   Future<Post> build(int arg) async {
-    final result = await ref.read(postRepositoryProvider).getPost(arg);
+    final result = await ref.watch(postRepositoryProvider).getPost(arg);
     return result.when(success: (p) => p, failure: (e) => throw e);
   }
 }
@@ -50,7 +50,7 @@ class CommentsNotifier extends FamilyAsyncNotifier<List<Comment>, int> {
   @override
   Future<List<Comment>> build(int arg) async {
     final result =
-        await ref.read(commentRepositoryProvider).getComments(arg);
+        await ref.watch(commentRepositoryProvider).getComments(arg);
     return result.when(success: (c) => c, failure: (e) => throw e);
   }
 }
@@ -65,7 +65,7 @@ final userProvider =
 class UserNotifier extends FamilyAsyncNotifier<User, int> {
   @override
   Future<User> build(int arg) async {
-    final result = await ref.read(userRepositoryProvider).getUser(arg);
+    final result = await ref.watch(userRepositoryProvider).getUser(arg);
     return result.when(success: (u) => u, failure: (e) => throw e);
   }
 }
@@ -83,7 +83,7 @@ class PostsByUserNotifier extends FamilyAsyncNotifier<List<Post>, int> {
   @override
   Future<List<Post>> build(int arg) async {
     final result =
-        await ref.read(postRepositoryProvider).getPostsByUser(arg);
+        await ref.watch(postRepositoryProvider).getPostsByUser(arg);
     return result.when(success: (p) => p, failure: (e) => throw e);
   }
 }

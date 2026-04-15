@@ -11,50 +11,64 @@ import '../../data/models/dtos.dart';
 final cachedDataSourceProvider = Provider<CachedDataSource>(
   (ref) => CachedDataSource(
     remote: ref.watch(remoteDataSourceProvider),
+    postListCache: ref.watch(postListCacheProvider),
     postCache: ref.watch(postCacheProvider),
     userCache: ref.watch(userCacheProvider),
   ),
 );
 
+// ── Cache key helpers ─────────────────────────────────────────────────────────
+
+abstract class CacheKeys {
+  static const allPosts = 'all_posts';
+  static String post(int id) => 'post_$id';
+  static String userPosts(int userId) => 'user_posts_$userId';
+}
+
 class CachedDataSource {
   CachedDataSource({
     required this.remote,
+    required this.postListCache,
     required this.postCache,
     required this.userCache,
   });
 
   final RemoteDataSource remote;
-  final InMemoryCache<String, dynamic> postCache;
-  final InMemoryCache<int, dynamic> userCache;
+
+  /// Caches keyed by string; values are `List<PostDto>` (all-posts & user-posts).
+  final InMemoryCache<String, List<PostDto>> postListCache;
+
+  /// Caches a single PostDto by string key.
+  final InMemoryCache<String, PostDto> postCache;
+
+  /// Caches a single UserDto by int id.
+  final InMemoryCache<int, UserDto> userCache;
 
   // ── Posts ────────────────────────────────────────────────────────────────
 
   Future<List<PostDto>> fetchPosts() async {
-    const key = 'all_posts';
-    final cached = postCache.get(key);
-    if (cached != null) {
-      return (cached as List).cast<PostDto>();
-    }
+    final cached = postListCache.get(CacheKeys.allPosts);
+    if (cached != null) return cached;
     final posts = await remote.fetchPosts();
-    postCache.set(key, posts, ttl: const Duration(minutes: 3));
+    postListCache.set(CacheKeys.allPosts, posts, ttl: const Duration(minutes: 3));
     return posts;
   }
 
   Future<PostDto> fetchPost(int id) async {
-    final key = 'post_$id';
+    final key = CacheKeys.post(id);
     final cached = postCache.get(key);
-    if (cached != null) return cached as PostDto;
+    if (cached != null) return cached;
     final post = await remote.fetchPost(id);
     postCache.set(key, post, ttl: const Duration(minutes: 10));
     return post;
   }
 
   Future<List<PostDto>> fetchPostsByUser(int userId) async {
-    final key = 'user_posts_$userId';
-    final cached = postCache.get(key);
-    if (cached != null) return (cached as List).cast<PostDto>();
+    final key = CacheKeys.userPosts(userId);
+    final cached = postListCache.get(key);
+    if (cached != null) return cached;
     final posts = await remote.fetchPostsByUser(userId);
-    postCache.set(key, posts, ttl: const Duration(minutes: 5));
+    postListCache.set(key, posts, ttl: const Duration(minutes: 5));
     return posts;
   }
 
@@ -68,7 +82,7 @@ class CachedDataSource {
 
   Future<UserDto> fetchUser(int id) async {
     final cached = userCache.get(id);
-    if (cached != null) return cached as UserDto;
+    if (cached != null) return cached;
     final user = await remote.fetchUser(id);
     // Users change rarely — cache for 30 minutes
     userCache.set(id, user, ttl: const Duration(minutes: 30));
@@ -77,6 +91,10 @@ class CachedDataSource {
 
   // ── Cache control ─────────────────────────────────────────────────────────
 
-  void invalidatePosts() => postCache.clear();
+  void invalidatePosts() {
+    postListCache.clear();
+    postCache.clear();
+  }
+
   void invalidateUser(int id) => userCache.invalidate(id);
 }

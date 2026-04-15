@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/models/dtos.dart';
+
 // ---------------------------------------------------------------------------
 // Generic in-memory cache with TTL
 // ---------------------------------------------------------------------------
@@ -42,10 +44,17 @@ class InMemoryCache<K, V> {
 // Singleton caches exposed as providers
 // ---------------------------------------------------------------------------
 
-final postCacheProvider = Provider<InMemoryCache<String, dynamic>>(
-  (_) => InMemoryCache<String, dynamic>(),
+/// Caches `List<PostDto>` — used for all-posts and user-posts lists.
+final postListCacheProvider = Provider<InMemoryCache<String, List<PostDto>>>(
+  (_) => InMemoryCache<String, List<PostDto>>(),
 );
 
-final userCacheProvider = Provider<InMemoryCache<int, dynamic>>(
-  (_) => InMemoryCache<int, dynamic>(),
+/// Caches a single `PostDto` by string key.
+final postCacheProvider = Provider<InMemoryCache<String, PostDto>>(
+  (_) => InMemoryCache<String, PostDto>(),
+);
+
+/// Caches a single `UserDto` by int id.
+final userCacheProvider = Provider<InMemoryCache<int, UserDto>>(
+  (_) => InMemoryCache<int, UserDto>(),
 );
