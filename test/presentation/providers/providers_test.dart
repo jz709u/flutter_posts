@@ -128,8 +128,8 @@ void main() {
 
       final repo = container.read(_fakeRepoProvider);
       final result = await repo.getPosts();
-      expect(result.data.first.id, 99);
-      expect(result.data.first.title, 'Override');
+      expect(result.dataOrNull!.first.id, 99);
+      expect(result.dataOrNull!.first.title, 'Override');
     });
   });
 }

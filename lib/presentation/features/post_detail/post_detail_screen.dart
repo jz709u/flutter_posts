@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../providers/providers.dart';
 import '../../router/app_router.dart';
 import '../../widgets/async_value_widget.dart';
+import '../../widgets/sliver_async_value_widget.dart';
 import '../../../domain/models/models.dart';
 
 class PostDetailScreen extends ConsumerWidget {
@@ -18,7 +19,15 @@ class PostDetailScreen extends ConsumerWidget {
     final comments = ref.watch(commentsProvider(postId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Post')),
+      appBar: AppBar(
+        title: const Text('Post'),
+        leading: context.canPop()
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new),
+                onPressed: context.pop,
+              )
+            : null,
+      ),
       body: AsyncValueWidget<Post>(
         value: post,
         data: (p) => CustomScrollView(
@@ -47,26 +56,11 @@ class PostDetailScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            comments.when(
+            SliverAsyncValueWidget<List<Comment>>(
+              value: comments,
               data: (list) => SliverList.builder(
                 itemCount: list.length,
                 itemBuilder: (_, i) => _CommentTile(comment: list[i]),
-              ),
-              loading: () => const SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.all(24),
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-              ),
-              error: (e, _) => SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(
-                    e.toString(),
-                    style: TextStyle(
-                        color: Theme.of(context).colorScheme.error),
-                  ),
-                ),
               ),
             ),
           ],
@@ -88,7 +82,7 @@ class _AuthorChip extends ConsumerWidget {
       data: (u) => ActionChip(
         avatar: const Icon(Icons.person_outline, size: 16),
         label: Text(u.name),
-        onPressed: () => context.goNamed(
+        onPressed: () => context.pushNamed(
           Routes.userProfileName,
           pathParameters: {'userId': userId.toString()},
         ),

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../providers/providers.dart';
 import '../../router/app_router.dart';
 import '../../widgets/async_value_widget.dart';
+import '../../widgets/sliver_async_value_widget.dart';
 import '../../../domain/models/models.dart';
 
 class UserScreen extends ConsumerWidget {
@@ -18,7 +19,15 @@ class UserScreen extends ConsumerWidget {
     final posts = ref.watch(postsByUserProvider(userId));
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile')),
+      appBar: AppBar(
+        title: const Text('Profile'),
+        leading: context.canPop()
+            ? IconButton(
+                icon: const Icon(Icons.arrow_back_ios_new),
+                onPressed: context.pop,
+              )
+            : null,
+      ),
       body: AsyncValueWidget<User>(
         value: user,
         data: (u) => CustomScrollView(
@@ -52,7 +61,8 @@ class UserScreen extends ConsumerWidget {
                 ),
               ),
             ),
-            posts.when(
+            SliverAsyncValueWidget<List<Post>>(
+              value: posts,
               data: (list) => SliverList.builder(
                 itemCount: list.length,
                 itemBuilder: (_, i) {
@@ -63,24 +73,12 @@ class UserScreen extends ConsumerWidget {
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
-                    onTap: () => context.goNamed(
+                    onTap: () => context.pushNamed(
                       Routes.postDetailName,
                       pathParameters: {'postId': post.id.toString()},
                     ),
                   );
                 },
-              ),
-              loading: () => const SliverToBoxAdapter(
-                child: Padding(
-                  padding: EdgeInsets.all(24),
-                  child: Center(child: CircularProgressIndicator()),
-                ),
-              ),
-              error: (e, _) => SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(16),
-                  child: Text(e.toString()),
-                ),
               ),
             ),
           ],

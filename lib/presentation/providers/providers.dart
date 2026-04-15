@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/error/result.dart';
 import '../../data/repositories/repository_impl_v2.dart';
 import '../../domain/models/models.dart';
 
@@ -13,13 +14,8 @@ final postsProvider = AsyncNotifierProvider<PostsNotifier, List<Post>>(
 
 class PostsNotifier extends AsyncNotifier<List<Post>> {
   @override
-  Future<List<Post>> build() async {
-    final result = await ref.watch(postRepositoryProvider).getPosts();
-    return result.when(
-      success: (posts) => posts,
-      failure: (e) => throw e,
-    );
-  }
+  Future<List<Post>> build() async =>
+      (await ref.watch(postRepositoryProvider).getPosts()).unwrap();
 }
 
 // ---------------------------------------------------------------------------
@@ -31,10 +27,8 @@ final postProvider =
 
 class PostNotifier extends FamilyAsyncNotifier<Post, int> {
   @override
-  Future<Post> build(int arg) async {
-    final result = await ref.watch(postRepositoryProvider).getPost(arg);
-    return result.when(success: (p) => p, failure: (e) => throw e);
-  }
+  Future<Post> build(int arg) async =>
+      (await ref.watch(postRepositoryProvider).getPost(arg)).unwrap();
 }
 
 // ---------------------------------------------------------------------------
@@ -48,11 +42,8 @@ final commentsProvider =
 
 class CommentsNotifier extends FamilyAsyncNotifier<List<Comment>, int> {
   @override
-  Future<List<Comment>> build(int arg) async {
-    final result =
-        await ref.watch(commentRepositoryProvider).getComments(arg);
-    return result.when(success: (c) => c, failure: (e) => throw e);
-  }
+  Future<List<Comment>> build(int arg) async =>
+      (await ref.watch(commentRepositoryProvider).getComments(arg)).unwrap();
 }
 
 // ---------------------------------------------------------------------------
@@ -64,10 +55,8 @@ final userProvider =
 
 class UserNotifier extends FamilyAsyncNotifier<User, int> {
   @override
-  Future<User> build(int arg) async {
-    final result = await ref.watch(userRepositoryProvider).getUser(arg);
-    return result.when(success: (u) => u, failure: (e) => throw e);
-  }
+  Future<User> build(int arg) async =>
+      (await ref.watch(userRepositoryProvider).getUser(arg)).unwrap();
 }
 
 // ---------------------------------------------------------------------------
@@ -81,9 +70,6 @@ final postsByUserProvider =
 
 class PostsByUserNotifier extends FamilyAsyncNotifier<List<Post>, int> {
   @override
-  Future<List<Post>> build(int arg) async {
-    final result =
-        await ref.watch(postRepositoryProvider).getPostsByUser(arg);
-    return result.when(success: (p) => p, failure: (e) => throw e);
-  }
+  Future<List<Post>> build(int arg) async =>
+      (await ref.watch(postRepositoryProvider).getPostsByUser(arg)).unwrap();
 }

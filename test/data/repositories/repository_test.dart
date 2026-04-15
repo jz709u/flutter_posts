@@ -47,7 +47,7 @@ void main() {
       final result = await _getPosts(ds);
 
       expect(result.isSuccess, isTrue);
-      final posts = result.data;
+      final posts = result.dataOrNull!;
       expect(posts.length, 2);
       expect(posts.first.title, 'Hello');
       expect(posts.first, isA<Post>());
@@ -58,7 +58,7 @@ void main() {
       final result = await _getPosts(ds);
 
       expect(result.isFailure, isTrue);
-      expect(result.error, isA<NetworkException>());
+      expect(result.errorOrNull, isA<NetworkException>());
     });
 
     test('maps DTOs to domain model fields correctly', () async {
@@ -66,7 +66,7 @@ void main() {
         posts: [PostDto(id: 42, userId: 7, title: 'Title', body: 'Body')],
       );
       final result = await _getPosts(ds);
-      final post = result.data.first;
+      final post = result.dataOrNull!.first;
 
       expect(post.id, 42);
       expect(post.userId, 7);
@@ -79,7 +79,7 @@ void main() {
       final result = await _getPosts(ds);
 
       expect(result.isSuccess, isTrue);
-      expect(result.data, isEmpty);
+      expect(result.dataOrNull, isEmpty);
     });
   });
 

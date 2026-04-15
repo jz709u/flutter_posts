@@ -15,15 +15,25 @@ void main() {
       expect(result.isSuccess, isFalse);
     });
 
-    test('Success.data returns the value', () {
+    test('Success.dataOrNull returns the value', () {
       const result = Success('hello');
-      expect(result.data, 'hello');
+      expect(result.dataOrNull, 'hello');
     });
 
-    test('Failure.error returns the exception', () {
+    test('Success.errorOrNull returns null', () {
+      const result = Success('hello');
+      expect(result.errorOrNull, isNull);
+    });
+
+    test('Failure.errorOrNull returns the exception', () {
       final ex = Exception('boom');
       final result = Failure<String>(ex);
-      expect(result.error, ex);
+      expect(result.errorOrNull, ex);
+    });
+
+    test('Failure.dataOrNull returns null', () {
+      final result = Failure<String>(Exception('boom'));
+      expect(result.dataOrNull, isNull);
     });
 
     test('when calls success branch for Success', () {
@@ -36,6 +46,17 @@ void main() {
       final result = Failure<int>(Exception('err'));
       final out = result.when(success: (v) => v, failure: (_) => -1);
       expect(out, -1);
+    });
+
+    test('unwrap returns value for Success', () {
+      const result = Success(99);
+      expect(result.unwrap(), 99);
+    });
+
+    test('unwrap throws exception for Failure', () {
+      final ex = Exception('boom');
+      final result = Failure<int>(ex);
+      expect(() => result.unwrap(), throwsA(ex));
     });
   });
 }

@@ -11,18 +11,31 @@ class AppException implements Exception {
 
   final String message;
 
+  /// Human-readable string suitable for display in the UI.
+  /// Subclasses override this to include extra context (e.g. status code).
+  String get userMessage => 'Something went wrong. Please try again.';
+
   @override
   String toString() => message;
 }
 
+
 class NetworkException extends AppException {
   const NetworkException(super.message);
+
+  @override
+  String get userMessage => 'No internet connection. Please try again.';
 }
 
 class ServerException extends AppException {
   const ServerException(super.message, {this.statusCode});
 
   final int? statusCode;
+
+  @override
+  String get userMessage => statusCode != null
+      ? 'Server error ($statusCode). Please try again later.'
+      : 'Server error. Please try again later.';
 }
 
 class UnknownException extends AppException {
