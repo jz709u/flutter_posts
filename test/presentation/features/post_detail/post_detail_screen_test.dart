@@ -140,7 +140,8 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      expect(find.text('Test Title'), findsOneWidget);
+      // Title appears in both the AppBar and the post heading
+      expect(find.text('Test Title'), findsWidgets);
       expect(find.text('Test body text'), findsOneWidget);
     });
 

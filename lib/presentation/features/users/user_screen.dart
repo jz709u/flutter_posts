@@ -19,7 +19,7 @@ class UserScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Profile'),
+        title: Text(user.valueOrNull?.name ?? 'Profile'),
         leading: context.canPop()
             ? IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new),
@@ -37,11 +37,6 @@ class UserScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      u.name,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    const SizedBox(height: 4),
                     Text('@${u.username}'),
                     const SizedBox(height: 4),
                     Text(u.email),

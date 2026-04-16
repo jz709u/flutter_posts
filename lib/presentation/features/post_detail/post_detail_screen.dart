@@ -19,7 +19,12 @@ class PostDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Post'),
+        toolbarHeight: 72,
+        title: Text(
+          post.valueOrNull?.title ?? 'Post',
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+        ),
         leading: context.canPop()
             ? IconButton(
                 icon: const Icon(Icons.arrow_back_ios_new),
@@ -37,11 +42,6 @@ class PostDetailScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      p.title,
-                      style: Theme.of(context).textTheme.headlineSmall,
-                    ),
-                    const SizedBox(height: 8),
                     _AuthorChip(userId: p.userId),
                     const SizedBox(height: 12),
                     Text(p.body),
