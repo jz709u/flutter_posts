@@ -4,6 +4,7 @@ import '../../core/error/result.dart';
 import '../../data/repositories/repository_impl_v2.dart';
 import '../../domain/models/models.dart';
 import 'auth_provider.dart';
+import 'current_user_provider.dart';
 
 // ---------------------------------------------------------------------------
 // Current user
@@ -14,6 +15,9 @@ import 'auth_provider.dart';
 /// Using [hashCode] of the Google user ID string gives a consistent int for
 /// the same account across sessions. Returns 0 when signed out.
 final currentUserIdProvider = Provider<int>((ref) {
+  final remoteUser = ref.watch(currentRemoteUserProvider);
+  if (remoteUser != null) return remoteUser.id;
+
   final account = ref.watch(authProvider).valueOrNull;
   return account?.id.hashCode.abs() ?? 0;
 });
@@ -89,6 +93,9 @@ class UserNotifier extends FamilyAsyncNotifier<User, int> {
     // widget that shows the current user (post cards, author chips, profile)
     // reflects the actual account rather than mock data.
     if (arg == ref.watch(currentUserIdProvider)) {
+      final remoteUser = ref.watch(currentRemoteUserProvider);
+      if (remoteUser != null) return remoteUser;
+
       final account = ref.watch(authProvider).valueOrNull;
       if (account != null) {
         return User(
@@ -98,6 +105,7 @@ class UserNotifier extends FamilyAsyncNotifier<User, int> {
           email: account.email,
           website: '',
           companyName: '',
+          googleId: account.id,
           photoUrl: account.photoUrl,
         );
       }

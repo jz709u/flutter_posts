@@ -108,5 +108,22 @@ void main() {
       expect(user.companyName, 'Acme Corp');
       expect(user.name, 'Alice');
     });
+
+    test('maps optional google metadata when present', () {
+      final dto = UserDto.fromJson({
+        'id': 7,
+        'name': 'Alice',
+        'email': 'alice@example.com',
+        'googleId': 'google-7',
+        'photoUrl': 'https://example.com/alice.png',
+      });
+      final user = dto.toDomain();
+
+      expect(user.username, 'alice');
+      expect(user.website, isEmpty);
+      expect(user.companyName, isEmpty);
+      expect(user.googleId, 'google-7');
+      expect(user.photoUrl, 'https://example.com/alice.png');
+    });
   });
 }

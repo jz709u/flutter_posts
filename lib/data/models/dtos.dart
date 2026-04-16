@@ -63,16 +63,65 @@ class UserDto {
     required this.email,
     required this.website,
     required this.companyName,
+    this.googleId,
+    this.photoUrl,
   });
 
   factory UserDto.fromJson(Map<String, dynamic> json) => UserDto(
         id: json['id'] as int,
         name: json['name'] as String,
-        username: json['username'] as String,
+        username: (json['username'] as String?) ??
+            (json['email'] as String).split('@').first,
         email: json['email'] as String,
-        website: json['website'] as String,
-        companyName: (json['company'] as Map<String, dynamic>)['name'] as String,
+        website: (json['website'] as String?) ?? '',
+        companyName:
+            ((json['company'] as Map<String, dynamic>?)?['name'] as String?) ??
+                '',
+        googleId: json['googleId'] as String?,
+        photoUrl: json['photoUrl'] as String?,
       );
+
+  factory UserDto.fromGoogleAccount({
+    required int id,
+    required String googleId,
+    required String email,
+    String? name,
+    String? photoUrl,
+  }) {
+    final trimmedName = name?.trim();
+    return UserDto(
+      id: id,
+      name: trimmedName != null && trimmedName.isNotEmpty ? trimmedName : email,
+      username: email.split('@').first,
+      email: email,
+      website: '',
+      companyName: '',
+      googleId: googleId,
+      photoUrl: photoUrl,
+    );
+  }
+
+  UserDto copyWith({
+    int? id,
+    String? name,
+    String? username,
+    String? email,
+    String? website,
+    String? companyName,
+    String? googleId,
+    String? photoUrl,
+  }) {
+    return UserDto(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      username: username ?? this.username,
+      email: email ?? this.email,
+      website: website ?? this.website,
+      companyName: companyName ?? this.companyName,
+      googleId: googleId ?? this.googleId,
+      photoUrl: photoUrl ?? this.photoUrl,
+    );
+  }
 
   final int id;
   final String name;
@@ -80,6 +129,8 @@ class UserDto {
   final String email;
   final String website;
   final String companyName;
+  final String? googleId;
+  final String? photoUrl;
 
   User toDomain() => User(
         id: id,
@@ -88,5 +139,7 @@ class UserDto {
         email: email,
         website: website,
         companyName: companyName,
+        googleId: googleId,
+        photoUrl: photoUrl,
       );
 }

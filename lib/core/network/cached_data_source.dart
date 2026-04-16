@@ -57,7 +57,8 @@ class CachedDataSource {
     final cached = postListCache.get(CacheKeys.allPosts);
     if (cached != null) return cached;
     final posts = await remote.fetchPosts();
-    postListCache.set(CacheKeys.allPosts, posts, ttl: const Duration(minutes: 3));
+    postListCache.set(CacheKeys.allPosts, posts,
+        ttl: const Duration(minutes: 3));
     return posts;
   }
 
@@ -93,6 +94,22 @@ class CachedDataSource {
     final user = await remote.fetchUser(id);
     // Users change rarely — cache for 30 minutes
     userCache.set(id, user, ttl: const Duration(minutes: 30));
+    return user;
+  }
+
+  Future<UserDto> ensureGoogleUser({
+    required String googleId,
+    required String email,
+    String? name,
+    String? photoUrl,
+  }) async {
+    final user = await remote.ensureGoogleUser(
+      googleId: googleId,
+      email: email,
+      name: name,
+      photoUrl: photoUrl,
+    );
+    userCache.set(user.id, user, ttl: const Duration(minutes: 30));
     return user;
   }
 

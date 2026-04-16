@@ -71,6 +71,7 @@ class User extends Equatable {
     required this.email,
     required this.website,
     required this.companyName,
+    this.googleId,
     this.photoUrl,
   });
 
@@ -80,6 +81,7 @@ class User extends Equatable {
   final String email;
   final String website;
   final String companyName;
+  final String? googleId;
 
   /// Optional profile photo URL. Populated for the signed-in user from
   /// their Google account; `null` for other users (avatar falls back to
@@ -94,6 +96,7 @@ class User extends Equatable {
     String? email,
     String? website,
     String? companyName,
+    String? googleId,
     String? photoUrl,
   }) =>
       User(
@@ -103,10 +106,11 @@ class User extends Equatable {
         email: email ?? this.email,
         website: website ?? this.website,
         companyName: companyName ?? this.companyName,
+        googleId: googleId ?? this.googleId,
         photoUrl: photoUrl ?? this.photoUrl,
       );
 
   @override
   List<Object?> get props =>
-      [id, name, username, email, website, companyName, photoUrl];
+      [id, name, username, email, website, companyName, googleId, photoUrl];
 }

@@ -64,4 +64,117 @@ class RemoteDataSource {
         final response = await dio.get<Map<String, dynamic>>('/users/$id');
         return UserDto.fromJson(response.data!);
       });
+
+  Future<UserDto> _updateExistingGoogleUser({
+    required UserDto existingUser,
+    required String googleId,
+    required String email,
+    String? name,
+    String? photoUrl,
+  }) async {
+    final trimmedName = name?.trim();
+    final normalizedPhotoUrl =
+        photoUrl != null && photoUrl.isNotEmpty ? photoUrl : null;
+    final needsUpdate = existingUser.googleId != googleId ||
+        existingUser.email != email ||
+        (trimmedName != null &&
+            trimmedName.isNotEmpty &&
+            existingUser.name != trimmedName) ||
+        existingUser.photoUrl != normalizedPhotoUrl;
+
+    if (!needsUpdate) return existingUser;
+
+    final payload = <String, dynamic>{
+      'googleId': googleId,
+      'email': email,
+      if (trimmedName != null && trimmedName.isNotEmpty) 'name': trimmedName,
+      'photoUrl': normalizedPhotoUrl,
+    };
+
+    final response = await dio.patch<Map<String, dynamic>>(
+      '/users/${existingUser.id}',
+      data: payload,
+    );
+
+    return UserDto.fromJson({
+      'id': existingUser.id,
+      'name': trimmedName != null && trimmedName.isNotEmpty
+          ? trimmedName
+          : existingUser.name,
+      'username': existingUser.username,
+      'email': email,
+      'website': existingUser.website,
+      'company': {'name': existingUser.companyName},
+      'googleId': googleId,
+      'photoUrl': normalizedPhotoUrl,
+      ...?response.data,
+      'company': response.data?['company'] ?? {'name': existingUser.companyName},
+    });
+  }
+
+  Future<UserDto> ensureGoogleUser({
+    required String googleId,
+    required String email,
+    String? name,
+    String? photoUrl,
+  }) =>
+      _request(() async {
+        final byGoogleId = await dio.get<List<dynamic>>(
+          '/users',
+          queryParameters: {'googleId': googleId},
+        );
+        if (byGoogleId.data!.isNotEmpty) {
+          return _updateExistingGoogleUser(
+            existingUser: UserDto.fromJson(
+              byGoogleId.data!.first as Map<String, dynamic>,
+            ),
+            googleId: googleId,
+            email: email,
+            name: name,
+            photoUrl: photoUrl,
+          );
+        }
+
+        final byEmail = await dio.get<List<dynamic>>(
+          '/users',
+          queryParameters: {'email': email},
+        );
+        if (byEmail.data!.isNotEmpty) {
+          return _updateExistingGoogleUser(
+            existingUser: UserDto.fromJson(
+              byEmail.data!.first as Map<String, dynamic>,
+            ),
+            googleId: googleId,
+            email: email,
+            name: name,
+            photoUrl: photoUrl,
+          );
+        }
+
+        final trimmedName = name?.trim();
+        final payload = <String, dynamic>{
+          'googleId': googleId,
+          'name': trimmedName != null && trimmedName.isNotEmpty
+              ? trimmedName
+              : email,
+          'username': email.split('@').first,
+          'email': email,
+          'website': '',
+          'company': {'name': ''},
+          if (photoUrl != null && photoUrl.isNotEmpty) 'photoUrl': photoUrl,
+        };
+
+        final response = await dio.post<Map<String, dynamic>>(
+          '/users',
+          data: payload,
+        );
+        final responseData = response.data ?? const <String, dynamic>{};
+
+        return UserDto.fromJson({
+          ...payload,
+          ...responseData,
+          'id': responseData['id'] ?? googleId.hashCode.abs(),
+          'company': responseData['company'] ?? payload['company'],
+        });
+      });
 }
