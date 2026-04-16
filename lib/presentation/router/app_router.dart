@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../features/posts/posts_screen.dart';
 import '../features/post_detail/post_detail_screen.dart';
+import '../features/profile/profile_screen.dart';
 import '../features/users/user_screen.dart';
 
 /// Named route constants — use these instead of raw strings when navigating.
@@ -11,6 +12,7 @@ abstract class Routes {
   static const postsName = 'posts';
   static const postDetailName = 'post-detail';
   static const userProfileName = 'user-profile';
+  static const myProfileName = 'my-profile';
 }
 
 final routerProvider = Provider<GoRouter>((ref) {
@@ -33,6 +35,11 @@ final routerProvider = Provider<GoRouter>((ref) {
         name: Routes.userProfileName,
         builder: (_, state) =>
             UserScreen(userId: state.requireInt('userId')),
+      ),
+      GoRoute(
+        path: '/profile',
+        name: Routes.myProfileName,
+        builder: (_, __) => const ProfileScreen(),
       ),
     ],
     errorBuilder: (_, state) => Scaffold(

@@ -5,6 +5,14 @@ import '../../data/repositories/repository_impl_v2.dart';
 import '../../domain/models/models.dart';
 
 // ---------------------------------------------------------------------------
+// Current user
+// ---------------------------------------------------------------------------
+
+/// The ID of the signed-in user. In a real app this would come from an
+/// auth provider; here it is fixed so the app can demonstrate a profile page.
+final currentUserIdProvider = Provider<int>((_) => 1);
+
+// ---------------------------------------------------------------------------
 // Posts
 // ---------------------------------------------------------------------------
 

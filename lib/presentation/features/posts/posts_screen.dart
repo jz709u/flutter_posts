@@ -17,6 +17,13 @@ class PostsScreen extends ConsumerWidget {
     return Scaffold(
       appBar: AppBar(
         title: const Text('Posts'),
+        actions: [
+          IconButton(
+            tooltip: 'My profile',
+            icon: const Icon(Icons.account_circle_outlined),
+            onPressed: () => context.pushNamed(Routes.myProfileName),
+          ),
+        ],
       ),
       body: AsyncValueWidget<List<Post>>(
         value: posts,
