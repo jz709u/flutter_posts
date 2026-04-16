@@ -3,7 +3,6 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../providers/providers.dart';
-import '../../providers/auth_provider.dart';
 import '../../router/app_router.dart';
 import '../../widgets/widgets.dart';
 import '../../../domain/models/models.dart';
@@ -17,8 +16,6 @@ class UserScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final user = ref.watch(userProvider(userId));
     final posts = ref.watch(postsByUserProvider(userId));
-    final isOwnProfile = userId == ref.watch(currentUserIdProvider);
-
     return Scaffold(
       appBar: AppBar(
         title: Text(user.valueOrNull?.name ?? 'Profile'),
@@ -28,15 +25,6 @@ class UserScreen extends ConsumerWidget {
                 onPressed: context.pop,
               )
             : null,
-        actions: [
-          if (isOwnProfile)
-            IconButton(
-              tooltip: 'Sign out',
-              icon: const Icon(Icons.logout),
-              onPressed: () =>
-                  ref.read(authProvider.notifier).signOut(),
-            ),
-        ],
       ),
       body: AsyncValueWidget<User>(
         value: user,
