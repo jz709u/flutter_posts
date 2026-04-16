@@ -79,7 +79,7 @@ class _AuthorChip extends ConsumerWidget {
     final user = ref.watch(userProvider(userId));
     return user.when(
       data: (u) => ActionChip(
-        avatar: const Icon(Icons.person_outline, size: 16),
+        avatar: UserAvatar(user: u, radius: 11),
         label: Text(u.name),
         onPressed: () => context.pushNamed(
           Routes.userProfileName,

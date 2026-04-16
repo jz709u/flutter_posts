@@ -118,7 +118,8 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
-      expect(find.text('Bob Smith'), findsOneWidget);
+      // Name appears in both the AppBar title and the profile header.
+      expect(find.text('Bob Smith'), findsWidgets);
       expect(find.text('@bsmith'), findsOneWidget);
       expect(find.text('bob@example.com'), findsOneWidget);
       expect(find.text('bob.dev'), findsOneWidget);

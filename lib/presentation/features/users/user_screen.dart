@@ -37,23 +37,60 @@ class UserScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text('@${u.username}'),
-                    const SizedBox(height: 4),
-                    Text(u.email),
-                    const SizedBox(height: 4),
-                    Text(u.website),
-                    const SizedBox(height: 4),
-                    Text(u.companyName,
-                        style: const TextStyle(fontStyle: FontStyle.italic)),
+                    // ── Profile header ──────────────────────────────────
+                    Center(
+                      child: Column(
+                        children: [
+                          UserAvatar(user: u, radius: 44),
+                          const SizedBox(height: 10),
+                          Text(
+                            u.name,
+                            style: Theme.of(context)
+                                .textTheme
+                                .titleLarge
+                                ?.copyWith(fontWeight: FontWeight.bold),
+                          ),
+                          Text(
+                            '@${u.username}',
+                            style: Theme.of(context)
+                                .textTheme
+                                .bodyMedium
+                                ?.copyWith(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onSurfaceVariant,
+                                ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 20),
+                    // ── Contact details ─────────────────────────────────
+                    _DetailRow(
+                      icon: Icons.email_outlined,
+                      label: u.email,
+                    ),
+                    const SizedBox(height: 8),
+                    _DetailRow(
+                      icon: Icons.language_outlined,
+                      label: u.website,
+                    ),
+                    const SizedBox(height: 8),
+                    _DetailRow(
+                      icon: Icons.business_outlined,
+                      label: u.companyName,
+                    ),
                     const SizedBox(height: 24),
                     Text(
                       'Posts',
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    const Divider(),
                   ],
                 ),
               ),
+            ),
+            const SliverToBoxAdapter(
+              child: Divider(height: 1, indent: 16, endIndent: 16),
             ),
             SliverAsyncValueWidget<List<Post>>(
               value: posts,
@@ -78,6 +115,31 @@ class UserScreen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+class _DetailRow extends StatelessWidget {
+  const _DetailRow({required this.icon, required this.label});
+
+  final IconData icon;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
+    return Row(
+      children: [
+        Icon(icon, size: 16, color: muted),
+        const SizedBox(width: 8),
+        Text(
+          label,
+          style: Theme.of(context)
+              .textTheme
+              .bodyMedium
+              ?.copyWith(color: muted),
+        ),
+      ],
     );
   }
 }

@@ -80,9 +80,8 @@ class _PostCard extends ConsumerWidget {
             author.when(
               data: (u) => Row(
                 children: [
-                  Icon(Icons.person_outline,
-                      size: 13, color: theme.colorScheme.primary),
-                  const SizedBox(width: 4),
+                  UserAvatar(user: u, radius: 11),
+                  const SizedBox(width: 6),
                   Text(
                     u.name,
                     style: theme.textTheme.labelSmall?.copyWith(
