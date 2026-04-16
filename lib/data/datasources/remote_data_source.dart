@@ -3,9 +3,15 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/network/dio_client.dart';
 import '../models/dtos.dart';
+import 'mock_data_source.dart';
+
+// Toggle this to switch between live API and realistic offline mock data.
+const _useMockData = true;
 
 final remoteDataSourceProvider = Provider<RemoteDataSource>(
-  (ref) => RemoteDataSource(dio: ref.watch(dioProvider)),
+  (ref) => _useMockData
+      ? MockRemoteDataSource()
+      : RemoteDataSource(dio: ref.watch(dioProvider)),
 );
 
 class RemoteDataSource {
