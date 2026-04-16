@@ -9,9 +9,14 @@ import 'auth_provider.dart';
 // Current user
 // ---------------------------------------------------------------------------
 
-/// The ID of the signed-in user. In a real app this would come from an
-/// auth provider; here it is fixed so the app can demonstrate a profile page.
-final currentUserIdProvider = Provider<int>((_) => 1);
+/// A stable local integer ID derived from the signed-in Google account's ID.
+///
+/// Using [hashCode] of the Google user ID string gives a consistent int for
+/// the same account across sessions. Returns 0 when signed out.
+final currentUserIdProvider = Provider<int>((ref) {
+  final account = ref.watch(authProvider).valueOrNull;
+  return account?.id.hashCode.abs() ?? 0;
+});
 
 // ---------------------------------------------------------------------------
 // Posts
@@ -112,6 +117,21 @@ final postsByUserProvider =
 
 class PostsByUserNotifier extends FamilyAsyncNotifier<List<Post>, int> {
   @override
-  Future<List<Post>> build(int arg) async =>
-      (await ref.watch(postRepositoryProvider).getPostsByUser(arg)).unwrap();
+  Future<List<Post>> build(int arg) async {
+    final repoPosts =
+        (await ref.watch(postRepositoryProvider).getPostsByUser(arg)).unwrap();
+
+    // Also include locally-created posts (negative IDs) that belong to this
+    // user — they live only in postsProvider's in-memory state and won't
+    // appear in the repository. This ensures the profile page shows posts
+    // composed by the signed-in Google user.
+    final localPosts = ref
+            .watch(postsProvider)
+            .valueOrNull
+            ?.where((p) => p.userId == arg && p.id < 0)
+            .toList() ??
+        [];
+
+    return [...localPosts, ...repoPosts];
+  }
 }
