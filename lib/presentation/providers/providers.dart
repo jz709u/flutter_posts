@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../core/error/result.dart';
 import '../../data/repositories/repository_impl_v2.dart';
 import '../../domain/models/models.dart';
+import 'auth_provider.dart';
 
 // ---------------------------------------------------------------------------
 // Current user
@@ -78,8 +79,26 @@ final userProvider =
 
 class UserNotifier extends FamilyAsyncNotifier<User, int> {
   @override
-  Future<User> build(int arg) async =>
-      (await ref.watch(userRepositoryProvider).getUser(arg)).unwrap();
+  Future<User> build(int arg) async {
+    // For the signed-in user, return their real Google account info so every
+    // widget that shows the current user (post cards, author chips, profile)
+    // reflects the actual account rather than mock data.
+    if (arg == ref.watch(currentUserIdProvider)) {
+      final account = ref.watch(authProvider).valueOrNull;
+      if (account != null) {
+        return User(
+          id: arg,
+          name: account.displayName ?? 'Me',
+          username: account.email.split('@').first,
+          email: account.email,
+          website: '',
+          companyName: '',
+          photoUrl: account.photoUrl,
+        );
+      }
+    }
+    return (await ref.watch(userRepositoryProvider).getUser(arg)).unwrap();
+  }
 }
 
 // ---------------------------------------------------------------------------

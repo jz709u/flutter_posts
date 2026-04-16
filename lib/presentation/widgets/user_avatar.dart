@@ -26,7 +26,10 @@ class _UserAvatarState extends State<UserAvatar> {
   Widget build(BuildContext context) {
     final colorScheme = Theme.of(context).colorScheme;
     final size = (widget.radius * 2).toInt();
-    final url = 'https://i.pravatar.cc/$size?u=user${widget.user.id}';
+    // Prefer an explicit photoUrl (e.g. from Google Sign-In); fall back to
+    // a consistent placeholder keyed on the user ID.
+    final url = widget.user.photoUrl ??
+        'https://i.pravatar.cc/$size?u=user${widget.user.id}';
     final initial = widget.user.name[0].toUpperCase();
     final textStyle = TextStyle(
       fontSize: widget.radius * 0.8,

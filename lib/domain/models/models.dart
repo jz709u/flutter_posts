@@ -71,6 +71,7 @@ class User extends Equatable {
     required this.email,
     required this.website,
     required this.companyName,
+    this.photoUrl,
   });
 
   final int id;
@@ -80,6 +81,11 @@ class User extends Equatable {
   final String website;
   final String companyName;
 
+  /// Optional profile photo URL. Populated for the signed-in user from
+  /// their Google account; `null` for other users (avatar falls back to
+  /// pravatar.cc).
+  final String? photoUrl;
+
   /// Returns a copy of this [User] with the given fields replaced.
   User copyWith({
     int? id,
@@ -88,6 +94,7 @@ class User extends Equatable {
     String? email,
     String? website,
     String? companyName,
+    String? photoUrl,
   }) =>
       User(
         id: id ?? this.id,
@@ -96,8 +103,10 @@ class User extends Equatable {
         email: email ?? this.email,
         website: website ?? this.website,
         companyName: companyName ?? this.companyName,
+        photoUrl: photoUrl ?? this.photoUrl,
       );
 
   @override
-  List<Object?> get props => [id, name, username, email, website, companyName];
+  List<Object?> get props =>
+      [id, name, username, email, website, companyName, photoUrl];
 }
