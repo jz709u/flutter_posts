@@ -6,6 +6,7 @@ import '../../providers/providers.dart';
 import '../../router/app_router.dart';
 import '../../widgets/widgets.dart';
 import '../../../domain/models/models.dart';
+import 'create_post_sheet.dart';
 
 class PostsScreen extends ConsumerWidget {
   const PostsScreen({super.key});
@@ -24,6 +25,11 @@ class PostsScreen extends ConsumerWidget {
             onPressed: () => context.pushNamed(Routes.myProfileName),
           ),
         ],
+      ),
+      floatingActionButton: FloatingActionButton.extended(
+        onPressed: () => showCreatePostSheet(context),
+        icon: const Icon(Icons.edit_outlined),
+        label: const Text('Post'),
       ),
       body: AsyncValueWidget<List<Post>>(
         value: posts,

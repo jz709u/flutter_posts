@@ -24,6 +24,12 @@ class PostsNotifier extends AsyncNotifier<List<Post>> {
   @override
   Future<List<Post>> build() async =>
       (await ref.watch(postRepositoryProvider).getPosts()).unwrap();
+
+  /// Prepends [post] to the feed without a round-trip to the server.
+  void addPost(Post post) {
+    final current = state.valueOrNull ?? [];
+    state = AsyncData([post, ...current]);
+  }
 }
 
 // ---------------------------------------------------------------------------
