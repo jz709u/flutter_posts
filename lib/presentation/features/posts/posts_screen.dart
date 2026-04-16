@@ -22,28 +22,86 @@ class PostsScreen extends ConsumerWidget {
         value: posts,
         data: (list) => RefreshIndicator(
           onRefresh: () => ref.refresh(postsProvider.future),
-          child: ListView.builder(
+          child: ListView.separated(
             itemCount: list.length,
-            itemBuilder: (context, index) {
-              final post = list[index];
-              return ListTile(
-                title: Text(
-                  post.title,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                subtitle: Text(
-                  post.body,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                ),
-                onTap: () => context.pushNamed(
-                  Routes.postDetailName,
-                  pathParameters: {'postId': post.id.toString()},
-                ),
-              );
-            },
+            separatorBuilder: (_, __) => const Divider(height: 1, indent: 16, endIndent: 16),
+            itemBuilder: (context, index) => _PostCard(post: list[index]),
           ),
+        ),
+      ),
+    );
+  }
+}
+
+class _PostCard extends ConsumerWidget {
+  const _PostCard({required this.post});
+
+  final Post post;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final theme = Theme.of(context);
+    final author = ref.watch(userProvider(post.userId));
+
+    return InkWell(
+      onTap: () => context.pushNamed(
+        Routes.postDetailName,
+        pathParameters: {'postId': post.id.toString()},
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              post.title,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.titleMedium
+                  ?.copyWith(fontWeight: FontWeight.w600),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              post.body,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: theme.colorScheme.onSurfaceVariant,
+              ),
+            ),
+            const SizedBox(height: 10),
+            author.when(
+              data: (u) => Row(
+                children: [
+                  Icon(Icons.person_outline,
+                      size: 13, color: theme.colorScheme.primary),
+                  const SizedBox(width: 4),
+                  Text(
+                    u.name,
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  Text(
+                    '· ${u.companyName}',
+                    style: theme.textTheme.labelSmall?.copyWith(
+                      color: theme.colorScheme.onSurfaceVariant,
+                    ),
+                  ),
+                ],
+              ),
+              loading: () => SizedBox(
+                height: 12,
+                width: 120,
+                child: LinearProgressIndicator(
+                  borderRadius: BorderRadius.circular(4),
+                ),
+              ),
+              error: (_, __) => const SizedBox.shrink(),
+            ),
+          ],
         ),
       ),
     );

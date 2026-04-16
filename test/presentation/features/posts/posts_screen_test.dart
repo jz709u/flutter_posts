@@ -35,6 +35,18 @@ class _FakePostRepository implements PostRepository {
       Success(posts.where((p) => p.userId == userId).toList());
 }
 
+class _FakeUserRepository implements UserRepository {
+  @override
+  Future<Result<User>> getUser(int id) async => Success(User(
+        id: id,
+        name: 'Alice',
+        username: 'alice',
+        email: 'alice@example.com',
+        website: 'alice.dev',
+        companyName: 'Acme',
+      ));
+}
+
 const _samplePosts = [
   Post(id: 1, userId: 1, title: 'First Post', body: 'Body one'),
   Post(id: 2, userId: 1, title: 'Second Post', body: 'Body two'),
@@ -61,6 +73,7 @@ Widget _buildApp(PostRepository repo) {
   return ProviderScope(
     overrides: [
       postRepositoryProvider.overrideWithValue(repo),
+      userRepositoryProvider.overrideWithValue(_FakeUserRepository()),
     ],
     child: MaterialApp.router(routerConfig: router),
   );
@@ -79,13 +92,14 @@ void main() {
       expect(find.byType(CircularProgressIndicator), findsOneWidget);
     });
 
-    testWidgets('renders a ListTile for each post', (tester) async {
+    testWidgets('renders a card row for each post', (tester) async {
       await tester.pumpWidget(_buildApp(_FakePostRepository(posts: _samplePosts)));
       await tester.pumpAndSettle();
 
       expect(find.text('First Post'), findsOneWidget);
       expect(find.text('Second Post'), findsOneWidget);
-      expect(find.byType(ListTile), findsNWidgets(2));
+      // Author name resolved from fake user repository
+      expect(find.text('Alice'), findsWidgets);
     });
 
     testWidgets('shows error message when repository fails', (tester) async {
@@ -94,7 +108,6 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('network error'), findsOneWidget);
-      expect(find.byType(ListTile), findsNothing);
     });
 
     testWidgets('shows AppBar with title "Posts"', (tester) async {
@@ -119,7 +132,6 @@ void main() {
       await tester.pumpWidget(_buildApp(_FakePostRepository()));
       await tester.pumpAndSettle();
 
-      expect(find.byType(ListTile), findsNothing);
       expect(find.byType(CircularProgressIndicator), findsNothing);
       expect(find.textContaining('error'), findsNothing);
     });
