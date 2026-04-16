@@ -16,7 +16,7 @@ class App extends ConsumerWidget {
     final router = ref.watch(routerProvider);
 
     return MaterialApp.router(
-      title: 'Flutter Demo',
+      title: 'Byline',
       theme: AppTheme.light,
       darkTheme: AppTheme.dark,
       routerConfig: router,

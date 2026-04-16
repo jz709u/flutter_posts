@@ -110,11 +110,11 @@ void main() {
       expect(find.textContaining('network error'), findsOneWidget);
     });
 
-    testWidgets('shows AppBar with title "Posts"', (tester) async {
+    testWidgets('shows AppBar with app title', (tester) async {
       await tester.pumpWidget(_buildApp(_FakePostRepository(posts: _samplePosts)));
       await tester.pumpAndSettle();
 
-      expect(find.text('Posts'), findsOneWidget);
+      expect(find.text('Byline'), findsOneWidget);
     });
 
     testWidgets('tapping a post navigates to detail screen', (tester) async {

@@ -16,7 +16,7 @@ class PostsScreen extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Posts'),
+        title: const Text('Byline'),
         actions: [
           IconButton(
             tooltip: 'My profile',
