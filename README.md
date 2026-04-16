@@ -1,7 +1,8 @@
 # Flutter Architecture Demo
 
-A production-ready Flutter app demonstrating clean architecture, modern state
-management, networking, caching, and testing patterns.
+A Flutter app demonstrating clean architecture, Riverpod state management,
+Google sign-in, remote user syncing, post browsing, and inline commenting with
+timestamps.
 
 ---
 
@@ -33,9 +34,11 @@ lib/
 │
 └── presentation/                # Flutter UI layer
     ├── features/
+    │   ├── login/               # Google sign-in entry screen
     │   ├── posts/               # Posts list screen
-    │   ├── post_detail/         # Post + comments + author chip
-    │   └── users/               # User profile + their posts
+    │   ├── post_detail/         # Post, comments, timestamps, composer
+    │   ├── profile/             # Signed-in user's profile
+    │   └── users/               # Public user profile + their posts
     ├── providers/
     │   └── providers.dart       # AsyncNotifier providers (Riverpod)
     ├── router/
@@ -47,6 +50,17 @@ lib/
 ```
 
 ## Key patterns
+
+### Current app behaviour
+
+- Users authenticate with Google before entering the main app.
+- After sign-in, the app ensures a matching remote user exists and stores that
+  remote profile for the current session.
+- The feed supports optimistic local post creation for the signed-in user.
+- Post detail supports inline comment creation with newest comments prepended.
+- Comments render localized timestamps when `createdAt` is available.
+- The comment composer starts collapsed as an `Add comment` button and returns
+  to that collapsed state after a successful send.
 
 ### Result<T> — typed error handling
 
@@ -109,7 +123,7 @@ class PostNotifier extends FamilyAsyncNotifier<Post, int> {
 ### Navigation with GoRouter
 
 Named routes + path parameters. The router is itself a Riverpod provider so
-it can react to auth-state changes in real apps.
+it reacts to auth-state changes and redirects signed-out users to `/login`.
 
 ```dart
 context.goNamed(
@@ -128,9 +142,11 @@ test/
 │   ├── result_test.dart         # Result type behaviour
 │   └── cache_test.dart          # TTL, invalidation, expiry
 ├── data/
-│   └── repository_test.dart     # DTO mapping + error propagation
+│   ├── repository_test.dart     # DTO mapping + error propagation
+│   └── datasources/             # Mock datasource behaviour
 └── presentation/
-    └── providers_test.dart      # ProviderContainer + fake repos
+    ├── providers_test.dart      # ProviderContainer + fake repos
+    └── features/                # Screen/widget interaction tests
 ```
 
 Run all tests:
@@ -177,16 +193,32 @@ flutter test
 | `go_router`            | Declarative navigation        |
 | `equatable`            | Value equality                |
 
+## Mock vs live data
+
+`RemoteDataSource` currently defaults to mock mode via `_useMockData = true` in
+`lib/data/datasources/remote_data_source.dart`.
+
+- Mock mode includes seeded users, posts, comments, avatars, and timestamps.
+- Live mode expects the backend to support:
+  - `GET /users?googleId=...`
+  - `GET /users?email=...`
+  - `POST /users`
+  - `PATCH /users/:id`
+  - `GET /comments?postId=...`
+  - `POST /comments`
+
 ## What to add for production
 
-- **Authentication** — add `AuthInterceptor` in `dio_client.dart` to attach
-  JWT tokens; add a `tokenProvider` that Riverpod manages.
+- **Authentication hardening** — add `AuthInterceptor` in `dio_client.dart` to
+  attach backend auth tokens and refresh them centrally.
 - **Persistent cache** — swap `InMemoryCache` for an `Isar` or `Hive` backed
   store so data survives restarts.
 - **Pagination** — extend `PostsNotifier` with a `loadMore()` method using
   `CancelToken` to abort in-flight requests when the user navigates away.
 - **Offline support** — check connectivity before fetching; serve stale cache
   with a warning banner.
+- **Comment persistence rules** — define server ordering, moderation, and edit
+  semantics instead of relying on client-side prepend behaviour.
 - **Error reporting** — pipe `AppException` to Sentry or Firebase Crashlytics
   in `_ErrorInterceptor`.
 - **Flavours** — `dart define` compile-time variables to swap `_baseUrl` and

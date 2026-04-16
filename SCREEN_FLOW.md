@@ -5,8 +5,8 @@
 ```mermaid
 graph TD
     subgraph Presentation["Presentation Layer"]
-        UI["Screens<br/>PostsScreen<br/>PostDetailScreen<br/>UserScreen"]
-        PROV["Providers<br/>postsProvider<br/>postProvider<br/>commentsProvider<br/>userProvider"]
+        UI["Screens<br/>LoginScreen<br/>PostsScreen<br/>PostDetailScreen<br/>ProfileScreen<br/>UserScreen"]
+        PROV["Providers<br/>authProvider<br/>postsProvider<br/>postProvider<br/>commentsProvider<br/>userProvider<br/>currentRemoteUserProvider"]
         ROUTER["Router<br/>GoRouter"]
         THEME["Theme<br/>AppTheme"]
     end
@@ -51,12 +51,16 @@ graph TD
 ```mermaid
 flowchart TD
     LAUNCH([App Launch]):::entry
-    POSTS["① Posts Screen<br/>──────────────<br/>AppBar: Posts<br/>ListView of posts<br/>pull-to-refresh"]:::screen
-    DETAIL["② Post Detail Screen<br/>──────────────<br/>Post title + body<br/>Author chip<br/>Comments list"]:::screen
-    PROFILE["③ User Profile Screen<br/>──────────────<br/>Name / email / company<br/>Users posts list"]:::screen
+    LOGIN["① Login Screen<br/>──────────────<br/>Google sign-in<br/>auth redirect gate"]:::screen
+    POSTS["② Posts Screen<br/>──────────────<br/>AppBar + profile action<br/>ListView of posts<br/>pull-to-refresh"]:::screen
+    DETAIL["③ Post Detail Screen<br/>──────────────<br/>Post title + body<br/>Author chip<br/>Add comment button<br/>Comments + timestamps"]:::screen
+    PROFILE["④ My/Profile Screen<br/>──────────────<br/>Name / email / company<br/>Users posts list"]:::screen
 
-    LAUNCH -->|"/ initial route"| POSTS
+    LAUNCH -->|signed out| LOGIN
+    LAUNCH -->|signed in| POSTS
+    LOGIN -->|"Google login success"| POSTS
     POSTS  -->|"tap post"| DETAIL
+    POSTS  -->|"tap profile"| PROFILE
     DETAIL -->|"tap author chip"| PROFILE
     PROFILE -->|"tap post"| DETAIL
 
@@ -72,23 +76,30 @@ flowchart TD
 flowchart LR
     subgraph S1["① Posts Screen"]
         direction TB
-        A1["AppBar: Posts"]
+        A1["AppBar: Byline + profile action"]
         A2["AsyncValueWidget"]
         A3["RefreshIndicator"]
         A4["ListView.builder<br/>ListTile per post<br/>title 2 lines<br/>subtitle 1 line"]
         A1 --> A2 --> A3 --> A4
     end
 
-    subgraph S2["② Post Detail Screen"]
+    subgraph S2["② Login Screen"]
+        direction TB
+        L1["Brand / copy"]
+        L2["Google sign-in button"]
+        L1 --> L2
+    end
+
+    subgraph S3["③ Post Detail Screen"]
         direction TB
         B1["AppBar: Post"]
         B2["CustomScrollView"]
-        B3["SliverToBoxAdapter<br/>post title<br/>post body<br/>AuthorChip"]
-        B4["SliverList.builder<br/>CommentTile per comment"]
+        B3["SliverToBoxAdapter<br/>post body<br/>AuthorChip<br/>Add comment button or composer"]
+        B4["SliverList.builder<br/>CommentTile per comment<br/>localized timestamp"]
         B1 --> B2 --> B3 --> B4
     end
 
-    subgraph S3["③ User Profile Screen"]
+    subgraph S4["④ My/User Profile Screen"]
         direction TB
         C1["AppBar: Profile"]
         C2["CustomScrollView"]
@@ -97,9 +108,11 @@ flowchart LR
         C1 --> C2 --> C3 --> C4
     end
 
-    S1 -->|tap post| S2
-    S2 -->|tap author chip| S3
-    S3 -->|tap post| S2
+    S2 -->|login success| S1
+    S1 -->|tap post| S3
+    S1 -->|tap profile| S4
+    S3 -->|tap author chip| S4
+    S4 -->|tap post| S3
 ```
 
 ---
@@ -109,11 +122,13 @@ flowchart LR
 ```mermaid
 flowchart LR
     subgraph Providers["Riverpod Providers"]
+        P0["authProvider<br/>AsyncNotifier"]
         P1["postsProvider<br/>AsyncNotifier"]
         P2["postProvider id<br/>FamilyAsyncNotifier"]
-        P3["commentsProvider id<br/>FamilyAsyncNotifier"]
+        P3["commentsProvider id<br/>FamilyAsyncNotifier<br/>create + prepend"]
         P4["userProvider id<br/>FamilyAsyncNotifier"]
         P5["postsByUserProvider id<br/>FamilyAsyncNotifier"]
+        P6["currentRemoteUserProvider<br/>Notifier"]
     end
 
     subgraph Cache["InMemoryCache TTL"]
@@ -129,6 +144,7 @@ flowchart LR
     P3 --> C5
     P4 --> C4
     P5 --> C3
+    P6 --> C4
 ```
 
 ---
@@ -137,11 +153,16 @@ flowchart LR
 
 ```mermaid
 flowchart LR
+    R0["/login<br/>LoginScreen"]
     R1["/<br/>PostsScreen"]
     R2["/posts/:postId<br/>PostDetailScreen"]
-    R3["/users/:userId<br/>UserScreen"]
+    R3["/profile<br/>ProfileScreen"]
+    R4["/users/:userId<br/>UserScreen"]
 
+    R0 -->|"auth success"| R1
     R1 -->|"goNamed post-detail"| R2
-    R2 -->|"goNamed user-profile"| R3
+    R1 -->|"goNamed my-profile"| R3
+    R2 -->|"goNamed user-profile"| R4
     R3 -->|"goNamed post-detail"| R2
+    R4 -->|"goNamed post-detail"| R2
 ```
