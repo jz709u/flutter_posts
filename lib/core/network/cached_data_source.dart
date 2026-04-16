@@ -86,6 +86,21 @@ class CachedDataSource {
   Future<List<CommentDto>> fetchComments(int postId) =>
       remote.fetchComments(postId);
 
+  Future<CommentDto> createComment({
+    required int postId,
+    required String name,
+    required String email,
+    required String body,
+    required DateTime createdAt,
+  }) =>
+      remote.createComment(
+        postId: postId,
+        name: name,
+        email: email,
+        body: body,
+        createdAt: createdAt,
+      );
+
   // ── Users ─────────────────────────────────────────────────────────────────
 
   Future<UserDto> fetchUser(int id) async {

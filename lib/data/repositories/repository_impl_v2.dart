@@ -44,8 +44,8 @@ class PostRepositoryImpl implements PostRepository {
   final CachedDataSource _ds;
 
   @override
-  Future<Result<List<Post>>> getPosts() =>
-      _mapResult(() async => (await _ds.fetchPosts()).map((d) => d.toDomain()).toList());
+  Future<Result<List<Post>>> getPosts() => _mapResult(
+      () async => (await _ds.fetchPosts()).map((d) => d.toDomain()).toList());
 
   @override
   Future<Result<Post>> getPost(int id) =>
@@ -53,7 +53,9 @@ class PostRepositoryImpl implements PostRepository {
 
   @override
   Future<Result<List<Post>>> getPostsByUser(int userId) =>
-      _mapResult(() async => (await _ds.fetchPostsByUser(userId)).map((d) => d.toDomain()).toList());
+      _mapResult(() async => (await _ds.fetchPostsByUser(userId))
+          .map((d) => d.toDomain())
+          .toList());
 }
 
 class CommentRepositoryImpl implements CommentRepository {
@@ -63,7 +65,27 @@ class CommentRepositoryImpl implements CommentRepository {
 
   @override
   Future<Result<List<Comment>>> getComments(int postId) =>
-      _mapResult(() async => (await _ds.fetchComments(postId)).map((d) => d.toDomain()).toList());
+      _mapResult(() async =>
+          (await _ds.fetchComments(postId)).map((d) => d.toDomain()).toList());
+
+  @override
+  Future<Result<Comment>> createComment({
+    required int postId,
+    required String name,
+    required String email,
+    required String body,
+    required DateTime createdAt,
+  }) =>
+      _mapResult(
+        () async => (await _ds.createComment(
+          postId: postId,
+          name: name,
+          email: email,
+          body: body,
+          createdAt: createdAt,
+        ))
+            .toDomain(),
+      );
 }
 
 class UserRepositoryImpl implements UserRepository {

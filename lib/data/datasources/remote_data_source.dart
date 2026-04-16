@@ -60,6 +60,33 @@ class RemoteDataSource {
             .toList();
       });
 
+  Future<CommentDto> createComment({
+    required int postId,
+    required String name,
+    required String email,
+    required String body,
+    required DateTime createdAt,
+  }) =>
+      _request(() async {
+        final payload = <String, dynamic>{
+          'postId': postId,
+          'name': name,
+          'email': email,
+          'body': body,
+          'createdAt': createdAt.toIso8601String(),
+        };
+        final response = await dio.post<Map<String, dynamic>>(
+          '/comments',
+          data: payload,
+        );
+        final responseData = response.data ?? const <String, dynamic>{};
+        return CommentDto.fromJson({
+          ...payload,
+          ...responseData,
+          'id': responseData['id'] ?? DateTime.now().millisecondsSinceEpoch,
+        });
+      });
+
   Future<UserDto> fetchUser(int id) => _request(() async {
         final response = await dio.get<Map<String, dynamic>>('/users/$id');
         return UserDto.fromJson(response.data!);
@@ -108,7 +135,8 @@ class RemoteDataSource {
       'googleId': googleId,
       'photoUrl': normalizedPhotoUrl,
       ...?response.data,
-      'company': response.data?['company'] ?? {'name': existingUser.companyName},
+      'company':
+          response.data?['company'] ?? {'name': existingUser.companyName},
     });
   }
 

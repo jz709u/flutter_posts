@@ -17,6 +17,15 @@ abstract class PostRepository {
 abstract class CommentRepository {
   /// Returns all comments for the post identified by [postId].
   Future<Result<List<Comment>>> getComments(int postId);
+
+  /// Creates a new comment for the post identified by [postId].
+  Future<Result<Comment>> createComment({
+    required int postId,
+    required String name,
+    required String email,
+    required String body,
+    required DateTime createdAt,
+  });
 }
 
 /// Provides access to user profile data.

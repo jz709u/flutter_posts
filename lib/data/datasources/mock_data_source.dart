@@ -12,6 +12,28 @@ class MockRemoteDataSource extends RemoteDataSource {
   static String _mockPhotoUrl(int id) =>
       'https://i.pravatar.cc/256?u=mock-user-$id';
 
+  static DateTime _mockCommentTimestamp(int id) =>
+      DateTime.utc(2026, 1, 1).add(Duration(hours: id * 6));
+
+  static Map<int, List<CommentDto>> _withMockCommentTimestamps(
+    Map<int, List<CommentDto>> commentsByPost,
+  ) {
+    return commentsByPost.map(
+      (postId, comments) => MapEntry(
+        postId,
+        comments
+            .map(
+              (comment) => comment.createdAt != null
+                  ? comment
+                  : comment.copyWith(
+                      createdAt: _mockCommentTimestamp(comment.id),
+                    ),
+            )
+            .toList(),
+      ),
+    );
+  }
+
   // ── Users ──────────────────────────────────────────────────────────────────
 
   static final _users = <int, UserDto>{
@@ -307,7 +329,7 @@ class MockRemoteDataSource extends RemoteDataSource {
 
   // ── Comments ───────────────────────────────────────────────────────────────
 
-  static final _comments = <int, List<CommentDto>>{
+  static final _comments = _withMockCommentTimestamps(<int, List<CommentDto>>{
     1: const [
       CommentDto(
           id: 1,
@@ -628,7 +650,7 @@ class MockRemoteDataSource extends RemoteDataSource {
           body:
               'Would love to know which single meeting you kept. My guess is a weekly whole-team ritual of some kind. For us it\'s a 25-minute Friday retro and nothing else.'),
     ],
-  };
+  });
 
   // ── Overrides ──────────────────────────────────────────────────────────────
 
@@ -650,6 +672,33 @@ class MockRemoteDataSource extends RemoteDataSource {
   @override
   Future<List<CommentDto>> fetchComments(int postId) async =>
       _comments[postId] ?? [];
+
+  @override
+  Future<CommentDto> createComment({
+    required int postId,
+    required String name,
+    required String email,
+    required String body,
+    required DateTime createdAt,
+  }) async {
+    final allComments = _comments.values.expand((comments) => comments);
+    final newId = allComments.fold<int>(
+          0,
+          (maxId, comment) => comment.id > maxId ? comment.id : maxId,
+        ) +
+        1;
+    final comment = CommentDto(
+      id: newId,
+      postId: postId,
+      name: name,
+      email: email,
+      body: body,
+      createdAt: createdAt,
+    );
+    final existing = _comments[postId] ?? const <CommentDto>[];
+    _comments[postId] = [...existing, comment];
+    return comment;
+  }
 
   @override
   Future<UserDto> fetchUser(int id) async {

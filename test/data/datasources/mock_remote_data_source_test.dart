@@ -13,6 +13,17 @@ void main() {
     });
   });
 
+  group('MockRemoteDataSource.fetchComments', () {
+    test('returns seeded comments with timestamps', () async {
+      final dataSource = MockRemoteDataSource();
+
+      final comments = await dataSource.fetchComments(1);
+
+      expect(comments, isNotEmpty);
+      expect(comments.every((comment) => comment.createdAt != null), isTrue);
+    });
+  });
+
   group('MockRemoteDataSource.ensureGoogleUser', () {
     test('creates a new user when the google account is not present', () async {
       final dataSource = MockRemoteDataSource();

@@ -8,6 +8,7 @@ import 'package:flutter_demo/domain/models/models.dart';
 import 'package:flutter_demo/domain/repositories/repositories.dart';
 import 'package:flutter_demo/data/repositories/repository_impl_v2.dart';
 import 'package:flutter_demo/presentation/features/post_detail/post_detail_screen.dart';
+import 'package:flutter_demo/presentation/providers/providers.dart';
 import 'package:flutter_demo/presentation/router/app_router.dart';
 
 // ---------------------------------------------------------------------------
@@ -25,13 +26,13 @@ class _FakePostRepository implements PostRepository {
   Future<Result<Post>> getPost(int id) async => Success(post);
 
   @override
-  Future<Result<List<Post>>> getPostsByUser(int userId) async => Success([post]);
+  Future<Result<List<Post>>> getPostsByUser(int userId) async =>
+      Success([post]);
 }
 
 class _FailingPostRepository implements PostRepository {
   @override
-  Future<Result<List<Post>>> getPosts() async =>
-      Failure(Exception('failed'));
+  Future<Result<List<Post>>> getPosts() async => Failure(Exception('failed'));
 
   @override
   Future<Result<Post>> getPost(int id) async =>
@@ -46,11 +47,33 @@ class _FakeCommentRepository implements CommentRepository {
   _FakeCommentRepository({this.comments = const [], this.shouldFail = false});
   final List<Comment> comments;
   final bool shouldFail;
+  final List<Comment> _createdComments = [];
 
   @override
   Future<Result<List<Comment>>> getComments(int postId) async {
     if (shouldFail) return Failure(Exception('comments failed'));
-    return Success(comments);
+    return Success([...comments, ..._createdComments]);
+  }
+
+  @override
+  Future<Result<Comment>> createComment({
+    required int postId,
+    required String name,
+    required String email,
+    required String body,
+    required DateTime createdAt,
+  }) async {
+    if (shouldFail) return Failure(Exception('comments failed'));
+    final comment = Comment(
+      id: comments.length + _createdComments.length + 1,
+      postId: postId,
+      name: name,
+      email: email,
+      body: body,
+      createdAt: createdAt,
+    );
+    _createdComments.add(comment);
+    return Success(comment);
   }
 }
 
@@ -62,7 +85,8 @@ class _FakeUserRepository implements UserRepository {
   Future<Result<User>> getUser(int id) async => Success(user);
 }
 
-const _post = Post(id: 1, userId: 7, title: 'Test Title', body: 'Test body text');
+const _post =
+    Post(id: 1, userId: 7, title: 'Test Title', body: 'Test body text');
 const _user = User(
   id: 7,
   name: 'Alice',
@@ -71,9 +95,21 @@ const _user = User(
   website: 'alice.dev',
   companyName: 'Acme',
 );
-const _comments = [
-  Comment(id: 1, postId: 1, name: 'Reviewer', email: 'r@r.com', body: 'Great post!'),
-  Comment(id: 2, postId: 1, name: 'Fan', email: 'f@f.com', body: 'Loved it'),
+final _comments = [
+  Comment(
+      id: 1,
+      postId: 1,
+      name: 'Reviewer',
+      email: 'r@r.com',
+      body: 'Great post!',
+      createdAt: DateTime(2026, 4, 10, 9, 15)),
+  Comment(
+      id: 2,
+      postId: 1,
+      name: 'Fan',
+      email: 'f@f.com',
+      body: 'Loved it',
+      createdAt: DateTime(2026, 4, 10, 10, 45)),
 ];
 
 // ---------------------------------------------------------------------------
@@ -84,6 +120,7 @@ Widget _buildApp({
   PostRepository? postRepo,
   CommentRepository? commentRepo,
   UserRepository? userRepo,
+  int currentUserId = 7,
 }) {
   final router = GoRouter(
     initialLocation: '/posts/1',
@@ -110,6 +147,7 @@ Widget _buildApp({
       if (commentRepo != null)
         commentRepositoryProvider.overrideWithValue(commentRepo),
       if (userRepo != null) userRepositoryProvider.overrideWithValue(userRepo),
+      currentUserIdProvider.overrideWithValue(currentUserId),
     ],
     child: MaterialApp.router(routerConfig: router),
   );
@@ -164,8 +202,19 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
+      final context = tester.element(find.byType(PostDetailScreen));
+      final localizations = MaterialLocalizations.of(context);
+      final firstTimestamp =
+          '${localizations.formatShortDate(_comments[0].createdAt!)} at '
+          '${localizations.formatTimeOfDay(TimeOfDay.fromDateTime(_comments[0].createdAt!))}';
+      final secondTimestamp =
+          '${localizations.formatShortDate(_comments[1].createdAt!)} at '
+          '${localizations.formatTimeOfDay(TimeOfDay.fromDateTime(_comments[1].createdAt!))}';
+
       expect(find.text('Great post!'), findsOneWidget);
       expect(find.text('Loved it'), findsOneWidget);
+      expect(find.text(firstTimestamp), findsOneWidget);
+      expect(find.text(secondTimestamp), findsOneWidget);
     });
 
     testWidgets('shows author chip with user name', (tester) async {
@@ -203,6 +252,27 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.textContaining('comments failed'), findsOneWidget);
+    });
+
+    testWidgets('submits a new comment', (tester) async {
+      await tester.pumpWidget(_buildApp(
+        postRepo: _FakePostRepository(post: _post),
+        commentRepo: _FakeCommentRepository(comments: _comments),
+        userRepo: _FakeUserRepository(user: _user),
+      ));
+      await tester.pumpAndSettle();
+
+      await tester.enterText(find.byType(TextField), 'Thanks for sharing');
+      await tester.tap(find.text('Send'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('Thanks for sharing'), findsOneWidget);
+      expect(find.text('Alice'), findsWidgets);
+
+      final newestTopLeft =
+          tester.getTopLeft(find.text('Thanks for sharing')).dy;
+      final olderTopLeft = tester.getTopLeft(find.text('Great post!')).dy;
+      expect(newestTopLeft, lessThan(olderTopLeft));
     });
   });
 }

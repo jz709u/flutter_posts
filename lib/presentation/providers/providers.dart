@@ -77,6 +77,23 @@ class CommentsNotifier extends FamilyAsyncNotifier<List<Comment>, int> {
   @override
   Future<List<Comment>> build(int arg) async =>
       (await ref.watch(commentRepositoryProvider).getComments(arg)).unwrap();
+
+  Future<void> submitComment({
+    required User author,
+    required String body,
+  }) async {
+    final createdAt = DateTime.now();
+    final created = await ref.read(commentRepositoryProvider).createComment(
+          postId: arg,
+          name: author.name,
+          email: author.email,
+          body: body,
+          createdAt: createdAt,
+        );
+    final comment = created.unwrap();
+    final current = state.valueOrNull ?? <Comment>[];
+    state = AsyncData([comment, ...current]);
+  }
 }
 
 // ---------------------------------------------------------------------------

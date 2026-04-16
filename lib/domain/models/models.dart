@@ -34,6 +34,7 @@ class Comment extends Equatable {
     required this.name,
     required this.email,
     required this.body,
+    this.createdAt,
   });
 
   final int id;
@@ -41,6 +42,7 @@ class Comment extends Equatable {
   final String name;
   final String email;
   final String body;
+  final DateTime? createdAt;
 
   /// Returns a copy of this [Comment] with the given fields replaced.
   Comment copyWith({
@@ -49,6 +51,7 @@ class Comment extends Equatable {
     String? name,
     String? email,
     String? body,
+    DateTime? createdAt,
   }) =>
       Comment(
         id: id ?? this.id,
@@ -56,10 +59,11 @@ class Comment extends Equatable {
         name: name ?? this.name,
         email: email ?? this.email,
         body: body ?? this.body,
+        createdAt: createdAt ?? this.createdAt,
       );
 
   @override
-  List<Object?> get props => [id, postId, name, email, body];
+  List<Object?> get props => [id, postId, name, email, body, createdAt];
 }
 
 /// A user / author profile.

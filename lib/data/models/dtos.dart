@@ -30,6 +30,7 @@ class CommentDto {
     required this.name,
     required this.email,
     required this.body,
+    this.createdAt,
   });
 
   factory CommentDto.fromJson(Map<String, dynamic> json) => CommentDto(
@@ -38,6 +39,7 @@ class CommentDto {
         name: json['name'] as String,
         email: json['email'] as String,
         body: json['body'] as String,
+        createdAt: _parseDateTime(json['createdAt']),
       );
 
   final int id;
@@ -45,6 +47,33 @@ class CommentDto {
   final String name;
   final String email;
   final String body;
+  final DateTime? createdAt;
+
+  CommentDto copyWith({
+    int? id,
+    int? postId,
+    String? name,
+    String? email,
+    String? body,
+    DateTime? createdAt,
+  }) =>
+      CommentDto(
+        id: id ?? this.id,
+        postId: postId ?? this.postId,
+        name: name ?? this.name,
+        email: email ?? this.email,
+        body: body ?? this.body,
+        createdAt: createdAt ?? this.createdAt,
+      );
+
+  Map<String, dynamic> toJson() => {
+        'id': id,
+        'postId': postId,
+        'name': name,
+        'email': email,
+        'body': body,
+        if (createdAt != null) 'createdAt': createdAt!.toIso8601String(),
+      };
 
   Comment toDomain() => Comment(
         id: id,
@@ -52,7 +81,13 @@ class CommentDto {
         name: name,
         email: email,
         body: body,
+        createdAt: createdAt,
       );
+}
+
+DateTime? _parseDateTime(Object? value) {
+  if (value is String && value.isNotEmpty) return DateTime.tryParse(value);
+  return null;
 }
 
 class UserDto {
