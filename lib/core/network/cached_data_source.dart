@@ -19,7 +19,14 @@ final cachedDataSourceProvider = Provider<CachedDataSource>(
 
 // ── Cache key helpers ─────────────────────────────────────────────────────────
 
-abstract class CacheKeys {
+/// Compile-time cache key constants and factories.
+///
+/// Using a centralised class prevents typo-prone magic strings scattered
+/// across the codebase. The private constructor ensures this class is never
+/// instantiated accidentally.
+final class CacheKeys {
+  CacheKeys._();
+
   static const allPosts = 'all_posts';
   static String post(int id) => 'post_$id';
   static String userPosts(int userId) => 'user_posts_$userId';

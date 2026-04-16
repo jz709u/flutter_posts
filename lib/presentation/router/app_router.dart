@@ -6,6 +6,7 @@ import '../features/posts/posts_screen.dart';
 import '../features/post_detail/post_detail_screen.dart';
 import '../features/users/user_screen.dart';
 
+/// Named route constants — use these instead of raw strings when navigating.
 abstract class Routes {
   static const postsName = 'posts';
   static const postDetailName = 'post-detail';
@@ -24,18 +25,14 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/posts/:postId',
         name: Routes.postDetailName,
-        builder: (_, state) {
-          final postId = int.parse(state.pathParameters['postId']!);
-          return PostDetailScreen(postId: postId);
-        },
+        builder: (_, state) =>
+            PostDetailScreen(postId: state.requireInt('postId')),
       ),
       GoRoute(
         path: '/users/:userId',
         name: Routes.userProfileName,
-        builder: (_, state) {
-          final userId = int.parse(state.pathParameters['userId']!);
-          return UserScreen(userId: userId);
-        },
+        builder: (_, state) =>
+            UserScreen(userId: state.requireInt('userId')),
       ),
     ],
     errorBuilder: (_, state) => Scaffold(
@@ -43,3 +40,8 @@ final routerProvider = Provider<GoRouter>((ref) {
     ),
   );
 });
+
+/// Convenience extension for extracting required integer path parameters.
+extension GoRouterStateX on GoRouterState {
+  int requireInt(String param) => int.parse(pathParameters[param]!);
+}

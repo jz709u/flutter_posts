@@ -4,8 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../providers/providers.dart';
 import '../../router/app_router.dart';
-import '../../widgets/async_value_widget.dart';
-import '../../widgets/sliver_async_value_widget.dart';
+import '../../widgets/widgets.dart';
 import '../../../domain/models/models.dart';
 
 class UserScreen extends ConsumerWidget {
