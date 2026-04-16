@@ -41,8 +41,17 @@ final postProvider =
 
 class PostNotifier extends FamilyAsyncNotifier<Post, int> {
   @override
-  Future<Post> build(int arg) async =>
-      (await ref.watch(postRepositoryProvider).getPost(arg)).unwrap();
+  Future<Post> build(int arg) async {
+    // Check the local feed first so optimistically-added posts (negative IDs)
+    // resolve without a repository round-trip.
+    final local = ref
+        .watch(postsProvider)
+        .valueOrNull
+        ?.where((p) => p.id == arg)
+        .firstOrNull;
+    if (local != null) return local;
+    return (await ref.watch(postRepositoryProvider).getPost(arg)).unwrap();
+  }
 }
 
 // ---------------------------------------------------------------------------
