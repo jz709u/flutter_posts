@@ -81,6 +81,7 @@ class _CommentComposer extends ConsumerStatefulWidget {
 
 class _CommentComposerState extends ConsumerState<_CommentComposer> {
   final _controller = TextEditingController();
+  bool _isExpanded = false;
   bool _submitting = false;
 
   @override
@@ -102,7 +103,11 @@ class _CommentComposerState extends ConsumerState<_CommentComposer> {
             author: author,
             body: text,
           );
-      _controller.clear();
+      if (!mounted) return;
+      setState(() {
+        _controller.clear();
+        _isExpanded = false;
+      });
     } catch (error) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
@@ -118,6 +123,20 @@ class _CommentComposerState extends ConsumerState<_CommentComposer> {
     final theme = Theme.of(context);
     final currentUser =
         ref.watch(userProvider(ref.watch(currentUserIdProvider)));
+
+    if (!_isExpanded) {
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 8),
+        child: Align(
+          alignment: Alignment.centerLeft,
+          child: OutlinedButton.icon(
+            onPressed: () => setState(() => _isExpanded = true),
+            icon: const Icon(Icons.add_comment_outlined),
+            label: const Text('Add comment'),
+          ),
+        ),
+      );
+    }
 
     return Padding(
       padding: const EdgeInsets.only(bottom: 8),
@@ -159,6 +178,17 @@ class _CommentComposerState extends ConsumerState<_CommentComposer> {
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
                 : const Text('Send'),
+          ),
+          const SizedBox(width: 8),
+          IconButton(
+            tooltip: 'Cancel comment',
+            onPressed: _submitting
+                ? null
+                : () => setState(() {
+                      _controller.clear();
+                      _isExpanded = false;
+                    }),
+            icon: const Icon(Icons.close),
           ),
         ],
       ),

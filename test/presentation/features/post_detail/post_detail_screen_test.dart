@@ -262,12 +262,21 @@ void main() {
       ));
       await tester.pumpAndSettle();
 
+      expect(find.text('Add comment'), findsOneWidget);
+      expect(find.byType(TextField), findsNothing);
+
+      await tester.tap(find.text('Add comment'));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(TextField), findsOneWidget);
       await tester.enterText(find.byType(TextField), 'Thanks for sharing');
       await tester.tap(find.text('Send'));
       await tester.pumpAndSettle();
 
       expect(find.text('Thanks for sharing'), findsOneWidget);
       expect(find.text('Alice'), findsWidgets);
+      expect(find.text('Add comment'), findsOneWidget);
+      expect(find.byType(TextField), findsNothing);
 
       final newestTopLeft =
           tester.getTopLeft(find.text('Thanks for sharing')).dy;
