@@ -22,7 +22,15 @@
       "Bash(node storyboard.js)",
       "Bash(npm root:*)",
       "Bash(NODE_PATH=$\\(npm root -g\\) node storyboard.js)",
-      "Bash(git mv:*)"
+      "Bash(git mv:*)",
+      "Bash(dart analyze:*)",
+      "Bash(rm /Users/hyro010/Code/FlutterProjects/flutter_proj_test/.git/index.lock)",
+      "Bash(flutter build:*)",
+      "Bash(rm -f /Users/hyro010/Code/FlutterProjects/flutter_proj_test/.git/index.lock)",
+      "Bash(sed -i '' 's/com\\\\.example\\\\.flutterDemo\\\\.RunnerTests/com.byline.app.RunnerTests/g' /Users/hyro010/Code/FlutterProjects/flutter_proj_test/ios/Runner.xcodeproj/project.pbxproj)",
+      "Bash(sed -i '' 's/com\\\\.example\\\\.flutterDemo/com.byline.app/g' /Users/hyro010/Code/FlutterProjects/flutter_proj_test/ios/Runner.xcodeproj/project.pbxproj)",
+      "Bash(sed -i '' 's/com\\\\.example\\\\.flutter_demo/com.byline.app/g' /Users/hyro010/Code/FlutterProjects/flutter_proj_test/android/app/build.gradle)",
+      "Bash(sed -i '' 's/android:label=\"flutter_demo\"/android:label=\"Byline\"/g' /Users/hyro010/Code/FlutterProjects/flutter_proj_test/android/app/src/main/AndroidManifest.xml)"
     ]
   }
 }
